@@ -1,2 +1,12 @@
 # Cursor IDE — keep local, do not push
 .cursor
+
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
