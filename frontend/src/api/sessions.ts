@@ -38,8 +38,16 @@ export async function fetchSession(sessionId: string): Promise<SpeechSession> {
   return data
 }
 
+export async function fetchSessionAudioUrl(sessionId: string): Promise<{ url: string }> {
+  const { data } = await apiClient.get<{ url: string }>(`/sessions/${sessionId}/audio-url`)
+  return data
+}
+
 export function getSessionErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
+    if (error.response?.status === 404) {
+      return 'Session not found or you do not have access to it.'
+    }
     const detail = error.response?.data?.detail
     if (typeof detail === 'string') return detail
     if (Array.isArray(detail)) {
@@ -47,7 +55,7 @@ export function getSessionErrorMessage(error: unknown): string {
         .map((item) => {
           if (item && typeof item === 'object' && 'msg' in item) {
             const field = Array.isArray(item.loc)
-              ? item.loc.filter((part) => part !== 'body').join('.')
+              ? item.loc.filter((part: string | number) => part !== 'body').join('.')
               : ''
             return field ? `${field}: ${item.msg}` : String(item.msg)
           }

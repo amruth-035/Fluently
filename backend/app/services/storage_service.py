@@ -45,3 +45,41 @@ def upload_session_audio(
 
     logger.info("Audio uploaded to %s", path)
     return path
+
+
+def create_signed_audio_url(audio_path: str, expires_in: int = 3600) -> str:
+    """Create a time-limited signed URL for a private storage object."""
+    if not audio_path:
+        raise ValueError("Audio path is missing.")
+
+    bucket = settings.supabase_storage_bucket
+    sign_url = (
+        f"{settings.supabase_url.rstrip('/')}/storage/v1/object/sign/{bucket}/{audio_path}"
+    )
+
+    response = httpx.post(
+        sign_url,
+        json={"expiresIn": expires_in},
+        headers={
+            "Authorization": f"Bearer {settings.supabase_service_key}",
+            "apikey": settings.supabase_service_key,
+        },
+        timeout=30.0,
+    )
+
+    if response.status_code != 200:
+        logger.error("Signed URL failed (%s): %s", response.status_code, response.text)
+        raise RuntimeError("Could not create audio playback URL.")
+
+    data = response.json()
+    signed = data.get("signedURL") or data.get("signedUrl")
+    if not signed:
+        raise RuntimeError("Storage did not return a signed URL.")
+
+    if signed.startswith("http"):
+        return signed
+
+    if signed.startswith("/storage/v1"):
+        return f"{settings.supabase_url.rstrip('/')}{signed}"
+
+    return f"{settings.supabase_url.rstrip('/')}/storage/v1{signed}"

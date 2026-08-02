@@ -5,9 +5,11 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import AuthUser, get_current_user
 from app.database.session import get_db
+from app.schemas.session_audio import SessionAudioUrlResponse
 from app.schemas.speech_session import SpeechSessionResponse, SpeechSessionSummary
 from app.services import session_service
 from app.services.session_pipeline import process_session_upload
+from app.services.storage_service import create_signed_audio_url
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -42,7 +44,34 @@ def list_sessions(
     db: Session = Depends(get_db),
 ) -> list[SpeechSessionSummary]:
     sessions = session_service.list_user_sessions(db, current_user.id)
-    return [SpeechSessionSummary.model_validate(session) for session in sessions]
+    return [SpeechSessionSummary.from_session(session) for session in sessions]
+
+
+@router.get("/{session_id}/audio-url", response_model=SessionAudioUrlResponse)
+def get_session_audio_url(
+    session_id: uuid.UUID,
+    current_user: AuthUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> SessionAudioUrlResponse:
+    session = session_service.get_user_session(db, current_user.id, session_id)
+    if session is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+
+    if not session.audio_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Audio not available for this session.",
+        )
+
+    try:
+        url = create_signed_audio_url(session.audio_path)
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        ) from exc
+
+    return SessionAudioUrlResponse(url=url)
 
 
 @router.get("/{session_id}", response_model=SpeechSessionResponse)

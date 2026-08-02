@@ -87,10 +87,11 @@ def save_lesson(db: Session, session: SpeechSession, lesson_data: dict) -> Pract
 def list_user_sessions(db: Session, user_id: uuid.UUID) -> list[SpeechSession]:
     stmt = (
         select(SpeechSession)
+        .options(joinedload(SpeechSession.analysis))
         .where(SpeechSession.user_id == user_id)
         .order_by(SpeechSession.created_at.desc())
     )
-    return list(db.scalars(stmt).all())
+    return list(db.scalars(stmt).unique().all())
 
 
 def get_user_session(db: Session, user_id: uuid.UUID, session_id: uuid.UUID) -> SpeechSession | None:

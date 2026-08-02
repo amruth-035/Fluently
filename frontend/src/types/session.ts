@@ -39,6 +39,7 @@ export interface SpeechSessionSummary {
   failed_step: string | null
   pipeline_error: string | null
   created_at: string
+  fluency_score: number | null
 }
 
 export interface SpeechSession extends SpeechSessionSummary {
