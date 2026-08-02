@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     database_url: str
     supabase_url: str
+    supabase_anon_key: str
     supabase_jwt_secret: str
     openai_api_key: str
     cors_origins: str = "http://localhost:5173"
