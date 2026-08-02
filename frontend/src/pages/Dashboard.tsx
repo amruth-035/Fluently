@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { Card } from '../components/ui/Card'
 import { ErrorMessage } from '../components/ui/ErrorMessage'
 import { Spinner } from '../components/ui/Spinner'
@@ -26,9 +27,11 @@ export function Dashboard() {
         {profileError && (
           <ErrorMessage
             message={
-              profileErr instanceof Error
-                ? profileErr.message
-                : 'Could not load your profile from the backend.'
+              axios.isAxiosError(profileErr) && profileErr.response?.data?.detail
+                ? `${profileErr.response.status}: ${profileErr.response.data.detail}`
+                : profileErr instanceof Error
+                  ? profileErr.message
+                  : 'Could not load your profile from the backend.'
             }
           />
         )}
