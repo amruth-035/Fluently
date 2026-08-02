@@ -1,19 +1,30 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="FluentAI API")
+from app.api.health import router as health_router
+from app.api.users import router as users_router
+from app.config import settings
+from app.utils.logging import setup_logging
 
-# The frontend runs on a different port (5173) than the API (8000).
-# Browsers block cross-origin requests unless the server allows them — this does.
+setup_logging()
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="Speech Coach API", version="0.1.0")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(health_router)
+app.include_router(users_router)
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+
+@app.on_event("startup")
+def on_startup() -> None:
+    logger.info("Speech Coach API starting (CORS origins: %s)", settings.cors_origins_list)
