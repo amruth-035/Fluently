@@ -1,6 +1,6 @@
-# Speech Coach — Backend
+# Fluently — Backend
 
-FastAPI backend for the AI Speech Coach MVP.
+FastAPI backend for the Fluently MVP.
 
 ## Prerequisites
 

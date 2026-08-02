@@ -36,7 +36,7 @@ export function Signup() {
     <div className="mx-auto max-w-md space-y-6 pt-12">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-slate-900">Sign up</h1>
-        <p className="mt-1 text-slate-600">Create your Speech Coach account.</p>
+        <p className="mt-1 text-slate-600">Create your Fluently account.</p>
       </div>
 
       <Card>

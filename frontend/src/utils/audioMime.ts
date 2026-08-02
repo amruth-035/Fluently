@@ -20,3 +20,18 @@ export function getSupportedAudioMimeType(): string {
 
   return ''
 }
+
+const MIME_TO_EXTENSION: Record<string, string> = {
+  'audio/webm': '.webm',
+  'audio/webm;codecs=opus': '.webm',
+  'audio/mp4': '.m4a',
+  'audio/ogg': '.ogg',
+  'audio/ogg;codecs=opus': '.ogg',
+  'audio/mpeg': '.mp3',
+  'audio/wav': '.wav',
+}
+
+export function filenameForBlob(blob: Blob): string {
+  const extension = MIME_TO_EXTENSION[blob.type] ?? '.webm'
+  return `recording${extension}`
+}

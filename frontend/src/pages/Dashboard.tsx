@@ -13,7 +13,7 @@ export function Dashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="mt-1 text-slate-600">Welcome to Speech Coach.</p>
+        <p className="mt-1 text-slate-600">Welcome to Fluently.</p>
       </div>
 
       <Card title="Your Account">

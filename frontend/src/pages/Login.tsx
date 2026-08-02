@@ -36,7 +36,7 @@ export function Login() {
     <div className="mx-auto max-w-md space-y-6 pt-12">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-slate-900">Log in</h1>
-        <p className="mt-1 text-slate-600">Welcome back to Speech Coach.</p>
+        <p className="mt-1 text-slate-600">Welcome back to Fluently.</p>
       </div>
 
       <Card>

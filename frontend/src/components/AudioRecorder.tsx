@@ -12,6 +12,7 @@ export interface RecordingPayload {
 
 interface AudioRecorderProps {
   onUseRecording?: (recording: RecordingPayload) => void
+  disabled?: boolean
 }
 
 const statusCopy = {
@@ -21,7 +22,7 @@ const statusCopy = {
   stopped: { label: 'Recording saved', dotClass: 'bg-green-500' },
 } as const
 
-export function AudioRecorder({ onUseRecording }: AudioRecorderProps) {
+export function AudioRecorder({ onUseRecording, disabled = false }: AudioRecorderProps) {
   const {
     state,
     error,
@@ -57,7 +58,7 @@ export function AudioRecorder({ onUseRecording }: AudioRecorderProps) {
 
         <div className="flex flex-wrap gap-3">
           {state === 'idle' && (
-            <Button onClick={startRecording} disabled={isBusy}>
+            <Button onClick={startRecording} disabled={isBusy || disabled}>
               Start recording
             </Button>
           )}
@@ -66,6 +67,7 @@ export function AudioRecorder({ onUseRecording }: AudioRecorderProps) {
             <Button
               variant="secondary"
               onClick={stopRecording}
+              disabled={disabled}
               className="border-red-300 text-red-700 hover:bg-red-50"
             >
               Stop recording
@@ -79,11 +81,16 @@ export function AudioRecorder({ onUseRecording }: AudioRecorderProps) {
               </audio>
 
               <div className="flex w-full flex-wrap gap-3">
-                <Button variant="secondary" onClick={deleteRecording}>
+                <Button variant="secondary" onClick={deleteRecording} disabled={disabled}>
                   Delete
                 </Button>
                 {onUseRecording && recording && (
-                  <Button onClick={() => onUseRecording(recording)}>Use this recording</Button>
+                  <Button
+                    onClick={() => onUseRecording(recording)}
+                    disabled={disabled}
+                  >
+                    Use this recording
+                  </Button>
                 )}
               </div>
             </>

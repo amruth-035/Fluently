@@ -4,6 +4,7 @@ import { AppLayout } from './layouts/AppLayout'
 import { Dashboard } from './pages/Dashboard'
 import { Login } from './pages/Login'
 import { Record } from './pages/Record'
+import { SessionDetail } from './pages/SessionDetail'
 import { Signup } from './pages/Signup'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="record" element={<Record />} />
+            <Route path="sessions/:sessionId" element={<SessionDetail />} />
           </Route>
         </Route>
       </Routes>

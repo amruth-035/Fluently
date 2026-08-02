@@ -12,7 +12,7 @@ from app.utils.logging import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Speech Coach API", version="0.1.0")
+app = FastAPI(title="Fluently API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,4 +29,4 @@ app.include_router(sessions_router)
 
 @app.on_event("startup")
 def on_startup() -> None:
-    logger.info("Speech Coach API starting (CORS origins: %s)", settings.cors_origins_list)
+    logger.info("Fluently API starting (CORS origins: %s)", settings.cors_origins_list)
