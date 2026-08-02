@@ -6,7 +6,12 @@ from sqlalchemy import create_engine, pool
 from app.config import settings
 from app.database.base import Base
 from app.database.url import normalize_database_url
-from app.models import User  # noqa: F401 — register models with metadata
+from app.models import (  # noqa: F401 — register models with metadata
+    AnalysisResult,
+    PracticeLesson,
+    SpeechSession,
+    User,
+)
 
 config = context.config
 
