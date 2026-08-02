@@ -19,6 +19,9 @@ export function AppLayout() {
             <NavLink to="/dashboard" className={navLinkClass}>
               Dashboard
             </NavLink>
+            <NavLink to="/record" className={navLinkClass}>
+              Record
+            </NavLink>
             {user ? (
               <>
                 <span className="hidden text-sm text-slate-600 sm:inline">{user.email}</span>
