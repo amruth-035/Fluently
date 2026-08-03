@@ -1,3 +1,5 @@
+"""GPT-4o lesson generation: personalized practice exercises from analysis output."""
+
 import json
 import logging
 

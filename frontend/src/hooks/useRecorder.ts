@@ -11,10 +11,16 @@ export interface RecordingResult {
 function permissionErrorMessage(error: unknown): string {
   if (error instanceof DOMException) {
     if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-      return 'Microphone access was denied. Allow microphone permission in your browser settings, then try again.'
+      return (
+        'Microphone access was denied. To enable it: click the lock or camera icon in your ' +
+        "browser's address bar → Site settings → Allow microphone → refresh this page and try again."
+      )
     }
     if (error.name === 'NotFoundError') {
       return 'No microphone was found. Connect a microphone and try again.'
+    }
+    if (error.name === 'NotReadableError') {
+      return 'Your microphone is in use by another app. Close other apps using the mic and try again.'
     }
   }
 
@@ -99,6 +105,16 @@ export function useRecorder() {
         clearTimer()
         const blobType = mimeTypeRef.current || recorder.mimeType || 'audio/webm'
         const blob = new Blob(chunksRef.current, { type: blobType })
+
+        if (blob.size < 1000 || durationRef.current < 1) {
+          setError(
+            'Recording is too short or empty. Speak for at least a second, then stop and try again.',
+          )
+          setState('idle')
+          stopTracks()
+          return
+        }
+
         const url = URL.createObjectURL(blob)
         playbackUrlRef.current = url
         setPlaybackUrl(url)

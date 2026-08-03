@@ -1,3 +1,5 @@
+"""Supabase Storage helpers: upload session audio and create signed download URLs."""
+
 import logging
 import uuid
 
@@ -83,3 +85,27 @@ def create_signed_audio_url(audio_path: str, expires_in: int = 3600) -> str:
         return f"{settings.supabase_url.rstrip('/')}{signed}"
 
     return f"{settings.supabase_url.rstrip('/')}/storage/v1{signed}"
+
+
+def download_session_audio(audio_path: str) -> bytes:
+    """Download stored audio bytes using the service role key."""
+    if not audio_path:
+        raise ValueError("Audio path is missing.")
+
+    bucket = settings.supabase_storage_bucket
+    url = f"{settings.supabase_url.rstrip('/')}/storage/v1/object/{bucket}/{audio_path}"
+
+    response = httpx.get(
+        url,
+        headers={
+            "Authorization": f"Bearer {settings.supabase_service_key}",
+            "apikey": settings.supabase_service_key,
+        },
+        timeout=60.0,
+    )
+
+    if response.status_code != 200:
+        logger.error("Storage download failed (%s): %s", response.status_code, response.text)
+        raise StorageUploadError(f"Could not download audio: {response.status_code}")
+
+    return response.content

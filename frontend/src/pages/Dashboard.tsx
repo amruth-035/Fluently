@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { ErrorMessage } from '../components/ui/ErrorMessage'
 import { Spinner } from '../components/ui/Spinner'
+import { getApiErrorMessage } from '../api/errors'
 import { useDashboard } from '../hooks/useDashboard'
 import { useSessions } from '../hooks/useSessions'
 
@@ -25,7 +26,7 @@ export function Dashboard() {
   if (isError || !dashboard) {
     return (
       <ErrorMessage
-        message={error instanceof Error ? error.message : 'Could not load dashboard.'}
+        message={getApiErrorMessage(error)}
       />
     )
   }

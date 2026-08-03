@@ -1,3 +1,5 @@
+"""Helpers for parsing and validating JSON returned by OpenAI chat completions."""
+
 import json
 import logging
 from collections.abc import Callable

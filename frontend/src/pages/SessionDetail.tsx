@@ -4,16 +4,18 @@ import { AnalysisCard } from '../components/AnalysisCard'
 import { LessonCard } from '../components/LessonCard'
 import { SessionAudioPlayer } from '../components/SessionAudioPlayer'
 import { TranscriptCard } from '../components/TranscriptCard'
+import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { ErrorMessage } from '../components/ui/ErrorMessage'
 import { Spinner } from '../components/ui/Spinner'
 import { getSessionErrorMessage } from '../api/sessions'
-import { useSession } from '../hooks/useSessions'
+import { useReprocessSession, useSession } from '../hooks/useSessions'
 import { formatDuration } from '../utils/formatDuration'
 
 export function SessionDetail() {
   const { sessionId } = useParams<{ sessionId: string }>()
-  const { data: session, isLoading, isError, error } = useSession(sessionId)
+  const { data: session, isLoading, isError, error, refetch } = useSession(sessionId)
+  const reprocess = useReprocessSession(sessionId)
 
   if (isLoading) {
     return (
@@ -45,6 +47,15 @@ export function SessionDetail() {
 
   const hasAudio = Boolean(session.audio_path)
   const isFailed = session.status === 'failed'
+  const canReprocess = isFailed && session.failed_step !== 'upload'
+
+  function handleReprocess() {
+    reprocess.mutate(undefined, {
+      onSuccess: () => {
+        refetch()
+      },
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -59,11 +70,34 @@ export function SessionDetail() {
         </p>
       </div>
 
-      {isFailed && session.pipeline_error && (
+      {isFailed && (
         <Card title="Processing incomplete">
-          <p className="text-sm text-red-700">{session.pipeline_error}</p>
+          <p className="text-sm text-red-700">
+            {session.pipeline_error ?? 'Something went wrong while processing this session.'}
+          </p>
           {session.failed_step && (
             <p className="mt-1 text-xs text-slate-500">Failed at: {session.failed_step}</p>
+          )}
+          {reprocess.isError && (
+            <div className="mt-3">
+              <ErrorMessage message={getSessionErrorMessage(reprocess.error)} />
+            </div>
+          )}
+          {canReprocess && (
+            <div className="mt-4">
+              <Button onClick={handleReprocess} disabled={reprocess.isPending}>
+                {reprocess.isPending ? 'Reprocessing…' : 'Retry processing'}
+              </Button>
+            </div>
+          )}
+          {session.failed_step === 'upload' && (
+            <p className="mt-3 text-sm text-slate-600">
+              Upload failed — please make a{' '}
+              <Link to="/record" className="font-medium text-indigo-600 hover:text-indigo-700">
+                new recording
+              </Link>
+              .
+            </p>
           )}
         </Card>
       )}

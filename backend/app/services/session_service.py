@@ -1,3 +1,5 @@
+"""CRUD and status updates for speech sessions, analysis results, and lessons."""
+
 import uuid
 from enum import StrEnum
 

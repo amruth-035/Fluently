@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { ErrorMessage } from '../components/ui/ErrorMessage'
@@ -8,6 +8,8 @@ import { useAuth } from '../contexts/AuthContext'
 export function Login() {
   const { signIn, user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const sessionExpired = searchParams.get('expired') === '1'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -41,6 +43,9 @@ export function Login() {
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {sessionExpired && (
+            <ErrorMessage message="Your session expired. Please log in again." />
+          )}
           {error && <ErrorMessage message={error} />}
 
           <div>

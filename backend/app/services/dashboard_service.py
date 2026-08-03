@@ -1,3 +1,5 @@
+"""Dashboard aggregates: session count, average fluency, and trend over time."""
+
 import uuid
 
 from sqlalchemy import select

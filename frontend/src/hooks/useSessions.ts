@@ -5,6 +5,7 @@ import {
   fetchSession,
   fetchSessionAudioUrl,
   fetchSessions,
+  reprocessSession,
   type UploadProgressHandler,
 } from '../api/sessions'
 import { useAuth } from '../contexts/AuthContext'
@@ -62,6 +63,19 @@ export function useCreateSession() {
       queryClient.invalidateQueries({ queryKey: ['sessions'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.setQueryData(['session', createdSession.id], createdSession)
+    },
+  })
+}
+
+export function useReprocessSession(sessionId: string | undefined) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => reprocessSession(sessionId!),
+    onSuccess: (updatedSession) => {
+      queryClient.setQueryData(['session', updatedSession.id], updatedSession)
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })
 }

@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,7 +20,13 @@ class Settings(BaseSettings):
     supabase_storage_bucket: str = "recordings"
     supabase_jwt_secret: str
     openai_api_key: str
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = Field(
+        default="http://localhost:5173",
+        description=(
+            "Comma-separated allowed browser origins. "
+            "Production: set to your deployed frontend URL(s), e.g. https://app.example.com"
+        ),
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:

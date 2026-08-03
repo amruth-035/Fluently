@@ -1,32 +1,40 @@
-# React + TypeScript + Vite
+# Fluently — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite + Tailwind UI for Fluently. Full setup instructions live in the [root README](../README.md).
 
-Currently, two official plugins are available:
+## Quick commands
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+cp .env.example .env              # then edit
+npm run dev                       # http://localhost:5173
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Environment variables
+
+See [frontend/.env.example](.env.example). All variables must be prefixed with `VITE_`.
+
+| Variable | Purpose |
+|----------|---------|
+| `VITE_API_URL` | Backend base URL |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase public anon key |
+
+## Module overview
+
+| Folder | Responsibility |
+|--------|----------------|
+| `src/api/` | Axios client, interceptors, typed API calls |
+| `src/components/` | Recorder, analysis/lesson cards, charts, UI primitives |
+| `src/hooks/` | TanStack Query hooks (sessions, dashboard, auth user) |
+| `src/pages/` | Route pages (login, record, dashboard, session detail) |
+| `src/contexts/` | Supabase auth state |
+| `src/types/` | Shared TypeScript interfaces |
+
+## Production build
+
+```bash
+npm run build
+```
+
+Set `VITE_API_URL` (and Supabase vars) to production values **before** building. Serve the `dist/` folder from your static host.

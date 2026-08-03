@@ -1,3 +1,5 @@
+"""Orchestrates the full session pipeline: upload → transcribe → analyze → lesson → save."""
+
 import logging
 import uuid
 from dataclasses import dataclass
@@ -11,6 +13,7 @@ from app.ai.transcription import transcribe_audio
 from app.models.speech_session import SpeechSession
 from app.models.session_enums import PipelineStep
 from app.services import session_service
+from app.services.audio_validation import validate_transcript, validate_uploaded_audio
 from app.services.storage_service import StorageUploadError, upload_session_audio
 
 logger = logging.getLogger(__name__)
@@ -56,12 +59,9 @@ def process_session_upload(
     content_type: str | None,
 ) -> PipelineResult:
     """Run the full upload → transcribe → analyze → lesson pipeline."""
-    if duration <= 0:
-        raise ValueError("Duration must be greater than zero.")
+    validate_uploaded_audio(audio_bytes, duration)
     if duration > MAX_DURATION_SECONDS:
         raise ValueError(f"Recording exceeds the {MAX_DURATION_SECONDS // 60}-minute limit.")
-    if not audio_bytes:
-        raise ValueError("Audio file is empty.")
     if len(audio_bytes) > MAX_AUDIO_BYTES:
         raise ValueError("Audio file is too large.")
 
@@ -89,7 +89,18 @@ def process_session_upload(
 
     try:
         transcript = transcribe_audio(audio_bytes, filename or f"recording{extension}")
+        validate_transcript(transcript)
         session_service.update_transcript(db, session, transcript)
+    except ValueError as exc:
+        logger.warning("Transcript validation failed for session %s: %s", session.id, exc)
+        message = str(exc)
+        session = session_service.mark_session_failed(
+            db,
+            session,
+            step=PipelineStep.TRANSCRIPTION,
+            error_message=message,
+        )
+        return PipelineResult(session=_reload(db, session.id), error_message=message)
     except Exception as exc:
         logger.exception("Transcription failed for session %s", session.id)
         message = f"Transcription failed: {exc}"

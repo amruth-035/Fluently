@@ -1,3 +1,5 @@
+"""User row sync: create on first login, update email when it changes."""
+
 import uuid
 
 from sqlalchemy.orm import Session

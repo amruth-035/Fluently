@@ -10,6 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import PyJWKClient
 
 from app.config import settings
+from app.utils.api_errors import ErrorCode, api_error
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer(auto_error=False)
@@ -68,9 +69,10 @@ def _verify_token_with_supabase(token: str) -> AuthUser:
             response.status_code,
             response.text,
         )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+        raise api_error(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid or expired token",
+            ErrorCode.UNAUTHORIZED,
         )
 
     data = response.json()
@@ -78,9 +80,10 @@ def _verify_token_with_supabase(token: str) -> AuthUser:
     email = data.get("email")
 
     if not user_id or not email:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
+        raise api_error(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid token payload",
+            ErrorCode.UNAUTHORIZED,
         )
 
     return AuthUser(id=uuid.UUID(user_id), email=email)
@@ -103,9 +106,10 @@ def _user_from_payload(payload: dict) -> AuthUser:
     email = _extract_email(payload)
 
     if not user_id or not email:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
+        raise api_error(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid token payload",
+            ErrorCode.UNAUTHORIZED,
         )
 
     return AuthUser(id=uuid.UUID(user_id), email=email)
@@ -115,9 +119,10 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> AuthUser:
     if credentials is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+        raise api_error(
+            status.HTTP_401_UNAUTHORIZED,
+            "Not authenticated",
+            ErrorCode.UNAUTHORIZED,
         )
 
     token = credentials.credentials
@@ -136,7 +141,8 @@ def get_current_user(
         raise
     except Exception as exc:
         logger.warning("Supabase API verification error: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+        raise api_error(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid or expired token",
+            ErrorCode.UNAUTHORIZED,
         ) from exc

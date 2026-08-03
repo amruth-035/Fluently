@@ -1,3 +1,5 @@
+"""OpenAI Whisper transcription for uploaded session audio."""
+
 import logging
 from io import BytesIO
 

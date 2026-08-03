@@ -1,9 +1,11 @@
+import axios from 'axios'
 import { apiClient } from './client'
 import { supabase } from './supabase'
 
+let handlingUnauthorized = false
+
 export function setupApiInterceptors() {
   apiClient.interceptors.request.use(async (config) => {
-    // Let the browser set multipart boundary — default application/json breaks file uploads
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']
     }
@@ -11,7 +13,6 @@ export function setupApiInterceptors() {
     const { data: sessionData } = await supabase.auth.getSession()
     let token = sessionData.session?.access_token
 
-    // Refresh if the access token is close to expiring or missing
     if (!token) {
       const { data: refreshed } = await supabase.auth.refreshSession()
       token = refreshed.session?.access_token
@@ -23,4 +24,28 @@ export function setupApiInterceptors() {
 
     return config
   })
+
+  apiClient.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.status === 401 &&
+        !handlingUnauthorized
+      ) {
+        handlingUnauthorized = true
+        try {
+          await supabase.auth.signOut()
+        } finally {
+          const isLoginPage = window.location.pathname.startsWith('/login')
+          if (!isLoginPage) {
+            window.location.assign('/login?expired=1')
+          }
+          handlingUnauthorized = false
+        }
+      }
+
+      return Promise.reject(error)
+    },
+  )
 }

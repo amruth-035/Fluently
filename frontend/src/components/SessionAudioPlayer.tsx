@@ -1,6 +1,7 @@
 import { Card } from './ui/Card'
 import { ErrorMessage } from './ui/ErrorMessage'
 import { Spinner } from './ui/Spinner'
+import { getApiErrorMessage } from '../api/errors'
 import { useSessionAudioUrl } from '../hooks/useSessions'
 
 interface SessionAudioPlayerProps {
@@ -34,7 +35,7 @@ export function SessionAudioPlayer({ sessionId, hasAudio }: SessionAudioPlayerPr
     return (
       <Card title="Recording">
         <ErrorMessage
-          message={error instanceof Error ? error.message : 'Could not load audio playback.'}
+          message={getApiErrorMessage(error)}
         />
       </Card>
     )

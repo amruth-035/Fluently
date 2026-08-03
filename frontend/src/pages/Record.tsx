@@ -15,10 +15,19 @@ export function Record() {
   const createSession = useCreateSession()
   const [pendingRecording, setPendingRecording] = useState<RecordingPayload | null>(null)
   const [uploadPhase, setUploadPhase] = useState<UploadPhase>('uploading')
+  const [clientError, setClientError] = useState<string | null>(null)
 
   const isUploading = createSession.isPending
 
   function handleUseRecording(recording: RecordingPayload) {
+    if (recording.blob.size < 1000 || recording.duration < 1) {
+      setClientError(
+        'Recording is too short or empty. Speak for at least a second, then try again.',
+      )
+      return
+    }
+
+    setClientError(null)
     setPendingRecording(recording)
     setUploadPhase('uploading')
     createSession.reset()
@@ -81,6 +90,8 @@ export function Record() {
           </p>
         </Card>
       )}
+
+      {clientError && <ErrorMessage message={clientError} />}
 
       {createSession.isError && (
         <div className="space-y-3">
